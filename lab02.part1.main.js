@@ -11,14 +11,14 @@ const IPCIDR = require('ip-cidr');
  * @param {string} cidrStr - The IPv4 subnet expressed
  *                 in CIDR format.
  * @param {callback} callback - A callback function.
- * @return {string} firstIpAddress - An IPv4 address.
+ * @return {string} (firstIpAddress) - An IPv4 address.
  */
 function getFirstIpAddress(cidrStr, callback) {
 
   // Initialize return arguments for callback
   let firstIpAddress = null;
   let callbackError = null;
- let firstAddress = null;
+
   // Instantiate an object from the imported class and assign the instance to variable cidr.
   const cidr = new IPCIDR(cidrStr);
   // Initialize options for the toArray() method.
@@ -30,24 +30,19 @@ function getFirstIpAddress(cidrStr, callback) {
   };
 
   // Use the object's isValid() method to verify the passed CIDR.
-  if (cidr.isValid()) {
-      // If the passed CIDR is valid, call the object's toArray() method.
-    // Notice the destructering assignment syntax to get the value of the first array's element.
-    [firstIpAddress] = cidr.toArray(options);
-    let mappedAddress = getIpv4MappedIpv6Address(firstIpAddress);
-   firstAddress="{\"ipv4\":\""+firstIpAddress +"\",\"ipv6\":\""+mappedAddress +"\"}";
-   
-  } else {
-    
+  if (!cidr.isValid()) {
     // If the passed CIDR is invalid, set an error message.
     callbackError = 'Error: Invalid CIDR passed to getFirstIpAddress.';
-    firstAddress = "{\"ipv4\":"+null +",\"ipv6\":"+null +"}";
+  } else {
+    // If the passed CIDR is valid, call the object's toArray() method.
+    // Notice the destructering assignment syntax to get the value of the first array's element.
+    [firstIpAddress] = cidr.toArray(options);
   }
   // Call the passed callback function.
   // Node.js convention is to pass error data as the first argument to a callback.
   // The IAP convention is to pass returned data as the first argument and error
   // data as the second argument to the callback function.
-  return callback(firstAddress, callbackError);
+  return callback(firstIpAddress, callbackError);
 }
 /**
  * Calculates an IPv4-mapped IPv6 address.
